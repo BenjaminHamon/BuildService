@@ -4,6 +4,19 @@ This page lists changes included in the software releases.
 For more details, see the project git history.
 
 
+## [Release 2.1](https://github.com/BenjaminHamon/JobOrchestra/releases/tag/release%2F2.1)
+
+_Revision 80c65f9d23192e6041dacc2be64753633ad2fea1 (23 May 2020)_
+
+Bug fixes, notably for memory leaks from asyncio timeouts.
+
+* Fix error handling for worker registration (9dcdc4ea49, 35ca28d402)
+* Fix request cancellation in messenger dispose (8f702f4858, 68bbb1e437)
+* Fix memory leak from timeouts on messenger receive (f705b050d4, 10841a585f)
+* Fix memory leak from timeouts on watching executor stdout (7c29a5cc22, 91cb4bcad6)
+* Revert to using the default max size for websocket messages (00dd953a39, a3558eab23)
+
+
 ## [Release 2.0](https://github.com/BenjaminHamon/JobOrchestra/releases/tag/release%2F2.0)
 
 _Revision 9d4b6abb481f8589d72c761164932c3412463ff8 (3 May 2020)_
