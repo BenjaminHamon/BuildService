@@ -13,7 +13,7 @@ class DateTimeProvider:
 
 	def now(self) -> datetime.datetime: # pylint: disable = no-self-use
 		""" Return the current datetime """
-		return datetime.datetime.utcnow().replace(microsecond = 0)
+		return datetime.datetime.now(datetime.timezone.utc).replace(microsecond = 0)
 
 
 	def serialize(self, value: datetime.datetime) -> str: # pylint: disable = no-self-use
