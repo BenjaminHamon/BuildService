@@ -1,10 +1,10 @@
 import json
 import logging
 import os
-
 from typing import Any, List, Optional, Tuple
 
 from bhamon_orchestra_model.database.database_client import DatabaseClient
+from bhamon_orchestra_model.serialization.json_serializer import JsonSerializer
 
 
 logger = logging.getLogger("JsonDatabaseClient")
@@ -14,7 +14,8 @@ class JsonDatabaseClient(DatabaseClient):
 	""" Client for a database storing data as json files, intended for development only. """
 
 
-	def __init__(self, data_directory: str) -> None:
+	def __init__(self, serializer: JsonSerializer, data_directory: str) -> None:
+		self.serializer = serializer
 		self._data_directory = data_directory
 
 
@@ -116,21 +117,23 @@ class JsonDatabaseClient(DatabaseClient):
 		file_path = os.path.join(self._data_directory, table + ".json")
 		if not os.path.exists(os.path.dirname(file_path)):
 			os.makedirs(os.path.dirname(file_path))
-		with open(file_path + ".tmp", mode = "w", encoding = "utf-8") as table_data_file:
-			json.dump(table_data, table_data_file, indent = 4)
-		os.replace(file_path + ".tmp", file_path)
+		self.serializer.serialize_to_file(file_path, table_data)
 
 
 	def _load_indexes(self, table: str) -> List[dict]:
 		""" Load all indexes for a table """
 
 		file_path = os.path.join(self._data_directory, "admin.json")
-		if not os.path.exists(file_path):
-			return []
-		with open(file_path, mode = "r", encoding = "utf-8") as administration_data_file:
-			administration_data = json.load(administration_data_file)
 
-		return [ index for index in administration_data["indexes"] if index["table"] == table ]
+		administration_data = None
+
+		try:
+			administration_data = self.serializer.deserialize_from_file(file_path)
+		except FileNotFoundError:
+			pass
+
+		all_indexes = administration_data["indexes"] if administration_data is not None else []
+		return [ index for index in all_indexes if index["table"] == table ]
 
 
 	def _match_filter(self, row: dict, filter: dict) -> bool: # pylint: disable = no-self-use, redefined-builtin

@@ -45,8 +45,8 @@ class UserProvider:
 			"display_name": display_name,
 			"roles": [],
 			"is_enabled": True,
-			"creation_date": self.date_time_provider.serialize(now),
-			"update_date": self.date_time_provider.serialize(now),
+			"creation_date": now,
+			"update_date": now,
 		}
 
 		database_client.insert_one(self.table, user)
@@ -58,7 +58,7 @@ class UserProvider:
 
 		update_data = {
 			"display_name": display_name,
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		}
 
 		update_data = { key: value for key, value in update_data.items() if value is not None }
@@ -72,7 +72,7 @@ class UserProvider:
 
 		update_data = {
 			"roles": roles,
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		}
 
 		user.update(update_data)
@@ -84,7 +84,7 @@ class UserProvider:
 
 		update_data = {
 			"is_enabled": is_enabled,
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		}
 
 		update_data = { key: value for key, value in update_data.items() if value is not None }

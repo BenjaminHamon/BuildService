@@ -1,11 +1,11 @@
 import asyncio
-import json
 import logging
 import traceback
 import uuid
 from typing import Callable, Optional
 
 from bhamon_orchestra_model.network.connection import NetworkConnection
+from bhamon_orchestra_model.serialization.iserializer import ISerializer
 
 
 logger = logging.getLogger("Messenger")
@@ -14,9 +14,10 @@ logger = logging.getLogger("Messenger")
 class Messenger:
 
 
-	def __init__(self, identifier: str, connection: NetworkConnection,
+	def __init__(self, serializer: ISerializer, identifier: str, connection: NetworkConnection, # pylint: disable = too-many-arguments
 			request_handler: Callable[[dict],None] = None, update_handler: Callable[[dict],None] = None) -> None:
 
+		self.serializer = serializer
 		self.identifier = identifier
 		self.connection = connection
 		self.request_handler = request_handler
@@ -123,7 +124,7 @@ class Messenger:
 
 		message = self._messages_to_send[0]
 		logger.debug("(%s) > %s %s", self.identifier, message["type"], message["identifier"])
-		await self.connection.send(json.dumps(message))
+		await self.connection.send(self.serializer.serialize_to_string(message))
 		self._messages_to_send.remove(message)
 
 		if message["type"] == "request":
@@ -136,7 +137,7 @@ class Messenger:
 
 
 	async def _receive_next(self) -> None:
-		message = json.loads(await self.connection.receive())
+		message = self.serializer.deserialize_from_string(await self.connection.receive())
 		logger.debug("(%s) < %s %s", self.identifier, message["type"], message["identifier"])
 		self._messages_to_handle.append(message)
 

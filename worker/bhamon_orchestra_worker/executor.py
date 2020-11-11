@@ -76,7 +76,7 @@ class Executor: # pylint: disable = too-few-public-methods
 				for step_index, step in enumerate(run_request["job"]["steps"])
 			],
 
-			"start_date": self._date_time_provider.serialize(self._date_time_provider.now()),
+			"start_date": self._date_time_provider.now(),
 			"completion_date": None,
 		}
 
@@ -87,7 +87,7 @@ class Executor: # pylint: disable = too-few-public-methods
 		logger.info("(%s) Run is starting for project '%s' and job '%s'", self.run_identifier, self._run_status["project_identifier"], self._run_status["job_identifier"])
 
 		try:
-			self._run_status["start_date"] = self._date_time_provider.serialize(self._date_time_provider.now())
+			self._run_status["start_date"] = self._date_time_provider.now()
 			self._storage.save_status(self.run_identifier, self._run_status)
 
 			if not os.path.exists(self._run_status["workspace"]):
@@ -106,13 +106,13 @@ class Executor: # pylint: disable = too-few-public-methods
 					is_skipping = True
 
 			self._run_status["status"] = run_final_status
-			self._run_status["completion_date"] = self._date_time_provider.serialize(self._date_time_provider.now())
+			self._run_status["completion_date"] = self._date_time_provider.now()
 			self._storage.save_status(self.run_identifier, self._run_status)
 
 		except: # pylint: disable = bare-except
 			logger.error("(%s) Run raised an exception", self.run_identifier, exc_info = True)
 			self._run_status["status"] = "exception"
-			self._run_status["completion_date"] = self._date_time_provider.serialize(self._date_time_provider.now())
+			self._run_status["completion_date"] = self._date_time_provider.now()
 			self._storage.save_status(self.run_identifier, self._run_status)
 
 		logger.info("(%s) Run completed with status %s", self.run_identifier, self._run_status["status"])

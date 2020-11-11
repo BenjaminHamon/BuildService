@@ -50,8 +50,8 @@ class WorkerProvider:
 			"is_enabled": True,
 			"is_active": False,
 			"should_disconnect": False,
-			"creation_date": self.date_time_provider.serialize(now),
-			"update_date": self.date_time_provider.serialize(now),
+			"creation_date": now,
+			"update_date": now,
 		}
 
 		database_client.insert_one(self.table, worker)
@@ -67,7 +67,7 @@ class WorkerProvider:
 			"is_active": is_active,
 			"is_enabled": is_enabled,
 			"should_disconnect": should_disconnect,
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		}
 
 		update_data = { key: value for key, value in update_data.items() if value is not None }
@@ -85,7 +85,7 @@ class WorkerProvider:
 			"version": version,
 			"display_name": display_name,
 			"properties": properties,
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		}
 
 		update_data = { key: value for key, value in update_data.items() if value is not None }

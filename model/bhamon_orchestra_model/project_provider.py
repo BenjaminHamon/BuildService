@@ -39,8 +39,8 @@ class ProjectProvider:
 				"identifier": project_identifier,
 				"display_name": display_name,
 				"services": services,
-				"creation_date": self.date_time_provider.serialize(now),
-				"update_date": self.date_time_provider.serialize(now),
+				"creation_date": now,
+				"update_date": now,
 			}
 
 			database_client.insert_one(self.table, project)
@@ -49,7 +49,7 @@ class ProjectProvider:
 			update_data = {
 				"display_name": display_name,
 				"services": services,
-				"update_date": self.date_time_provider.serialize(now),
+				"update_date": now,
 			}
 
 			project.update(update_data)

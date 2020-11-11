@@ -6,6 +6,11 @@ class ISerializer(abc.ABC):
 
 
 	@abc.abstractmethod
+	def get_file_extension(self) -> None:
+		pass
+
+
+	@abc.abstractmethod
 	def serialize_to_file(self, path: str, value: Optional[Any]) -> None:
 		pass
 

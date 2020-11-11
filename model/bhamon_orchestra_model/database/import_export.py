@@ -1,16 +1,16 @@
-import json
 import logging
 import os
 
 from typing import List
 
 from bhamon_orchestra_model.database.database_client import DatabaseClient
+from bhamon_orchestra_model.serialization.iserializer import ISerializer
 
 
 logger = logging.getLogger("Database")
 
 
-def import_database(database_client: DatabaseClient, source_directory: str, simulate: bool = False) -> None:
+def import_database(database_client: DatabaseClient, serializer: ISerializer, source_directory: str, simulate: bool = False) -> None:
 	logger.info("Importing database")
 
 	if not os.path.exists(source_directory):
@@ -23,7 +23,7 @@ def import_database(database_client: DatabaseClient, source_directory: str, simu
 	check_if_empty(database_client, all_tables)
 
 	for table in all_tables:
-		import_table(database_client, table, source_directory, simulate = simulate)
+		import_table(database_client, serializer, table, source_directory, simulate = simulate)
 
 
 def check_if_empty(database_client: DatabaseClient, all_tables: List[str]) -> None:
@@ -38,20 +38,18 @@ def check_if_empty(database_client: DatabaseClient, all_tables: List[str]) -> No
 		raise ValueError("Database is not empty")
 
 
-def import_table(database_client: DatabaseClient, table: str, source_directory: str, simulate: bool = False) -> None:
+def import_table(database_client: DatabaseClient, serializer: ISerializer, table: str, source_directory: str, simulate: bool = False) -> None:
 	logger.info("Importing table '%s'", table)
 
-	source_file_path = os.path.join(source_directory, table + ".json")
-
-	with open(source_file_path, mode = "r", encoding = "utf-8") as source_file:
-		dataset = json.load(source_file)
+	source_file_path = os.path.join(source_directory, table + serializer.get_file_extension())
+	dataset = serializer.deserialize_from_file(source_file_path)
 
 	if not simulate:
 		if len(dataset) > 0:
 			database_client.insert_many(table, dataset)
 
 
-def export_database(database_client: DatabaseClient, output_directory: str, simulate: bool = False) -> None:
+def export_database(database_client: DatabaseClient, serializer: ISerializer, output_directory: str, simulate: bool = False) -> None:
 	logger.info("Exporting database")
 
 	if os.path.exists(output_directory):
@@ -64,16 +62,14 @@ def export_database(database_client: DatabaseClient, output_directory: str, simu
 	all_tables += [ "user", "user_authentication" ]
 
 	for table in all_tables:
-		export_table(database_client, table, output_directory, simulate = simulate)
+		export_table(database_client, serializer, table, output_directory, simulate = simulate)
 
 
-def export_table(database_client: DatabaseClient, table: str, output_directory: str, simulate: bool = False) -> None:
+def export_table(database_client: DatabaseClient, serializer: ISerializer, table: str, output_directory: str, simulate: bool = False) -> None:
 	logger.info("Exporting table '%s'", table)
 
 	dataset = database_client.find_many(table, {})
-	output_file_path = os.path.join(output_directory, table + ".json")
+	output_file_path = os.path.join(output_directory, table + serializer.get_file_extension())
 
 	if not simulate:
-		with open(output_file_path + ".tmp", mode = "w", encoding = "utf-8") as output_file:
-			json.dump(dataset, output_file, indent = 4)
-		os.replace(output_file_path + ".tmp", output_file_path)
+		serializer.serialize_to_file(output_file_path, dataset)

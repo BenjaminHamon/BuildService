@@ -39,7 +39,7 @@ def show(user_identifier): # pylint: disable = unused-argument
 		user_tokens = service_client.get("/user/{user_identifier}/token_collection".format(**locals()), { "order_by": [ "update_date descending" ] })
 		user_tokens.sort(key = lambda token: token["expiration_date"] is not None)
 
-		now = flask.current_app.date_time_provider.serialize(flask.current_app.date_time_provider.now())
+		now = flask.current_app.date_time_provider.now()
 		for token in user_tokens:
 			token["is_active"] = token["expiration_date"] > now if token["expiration_date"] is not None else True
 

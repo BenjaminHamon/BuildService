@@ -38,8 +38,8 @@ class AuthenticationProvider:
 				"identifier": str(uuid.uuid4()),
 				"user": user,
 				"type": "password",
-				"creation_date": self.date_time_provider.serialize(now),
-				"update_date": self.date_time_provider.serialize(now),
+				"creation_date": now,
+				"update_date": now,
 			}
 
 			database_client.insert_one(self.table, authentication)
@@ -48,7 +48,7 @@ class AuthenticationProvider:
 			"hash_function": self.password_hash_function,
 			"hash_function_parameters": self.password_hash_function_parameters,
 			"hash_function_salt": secrets.token_hex(self.password_salt_size),
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		})
 
 		authentication["secret"] = self.hash_password(password, authentication["hash_function_salt"], authentication["hash_function"], authentication["hash_function_parameters"])
@@ -70,7 +70,7 @@ class AuthenticationProvider:
 
 
 	def authenticate_with_token(self, database_client: DatabaseClient, user_identifier: str, secret: str) -> bool:
-		now = self.date_time_provider.serialize(self.date_time_provider.now())
+		now = self.date_time_provider.now()
 		user_tokens = database_client.find_many(self.table, { "user": user_identifier, "type": "token" })
 
 		for token in user_tokens:
@@ -115,12 +115,12 @@ class AuthenticationProvider:
 			"hash_function_parameters": self.token_hash_function_parameters,
 			"hash_function_salt": None,
 			"expiration_date": None,
-			"creation_date": self.date_time_provider.serialize(now),
-			"update_date": self.date_time_provider.serialize(now),
+			"creation_date": now,
+			"update_date": now,
 		}
 
 		if expiration is not None:
-			token["expiration_date"] = self.date_time_provider.serialize(now + expiration)
+			token["expiration_date"] = now + expiration
 
 		secret = secrets.token_hex(self.token_size)
 		token["secret"] = self.hash_token(secret, token["hash_function"], token["hash_function_parameters"])
@@ -139,8 +139,8 @@ class AuthenticationProvider:
 		now = self.date_time_provider.now()
 
 		update_data = {
-			"expiration_date": self.date_time_provider.serialize(now + expiration),
-			"update_date": self.date_time_provider.serialize(now),
+			"expiration_date": now + expiration,
+			"update_date": now,
 		}
 
 		database_client.update_one(self.table, { "identifier": token_identifier, "user": user_identifier, "type": "token" }, update_data)

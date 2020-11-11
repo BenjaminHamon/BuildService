@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import re
@@ -6,6 +5,7 @@ import shutil
 from typing import Any, List, Optional
 
 from bhamon_orchestra_model.database.file_data_storage import FileDataStorage
+from bhamon_orchestra_model.serialization.json_serializer import JsonSerializer
 
 
 logger = logging.getLogger("WorkerStorage")
@@ -14,8 +14,9 @@ logger = logging.getLogger("WorkerStorage")
 class WorkerStorage:
 
 
-	def __init__(self, storage: FileDataStorage) -> None:
+	def __init__(self, storage: FileDataStorage, serializer: JsonSerializer) -> None:
 		self._storage = storage
+		self._serializer = serializer
 
 
 	def list_runs(self) -> List[str]:
@@ -91,11 +92,11 @@ class WorkerStorage:
 		key = "runs" + "/" + run_identifier + "/" + key + ".json"
 		with self._storage.lock(key):
 			raw_data = self._storage.get(key)
-		return json.loads(raw_data.decode("utf-8")) if raw_data is not None else None
+		return self._serializer.deserialize_from_string(raw_data.decode("utf-8")) if raw_data is not None else None
 
 
 	def save_json(self, run_identifier: str, key: str, data: Any) -> None:
 		key = "runs" + "/" + run_identifier + "/" + key + ".json"
-		serialized_data = json.dumps(data, indent = 4).encode("utf-8")
+		serialized_data = self._serializer.serialize_to_string(data).encode("utf-8")
 		with self._storage.lock(key):
 			self._storage.set(key, serialized_data)

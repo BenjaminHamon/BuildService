@@ -53,8 +53,8 @@ class JobProvider:
 				"parameters": parameters,
 				"properties": properties,
 				"is_enabled": True,
-				"creation_date": self.date_time_provider.serialize(now),
-				"update_date": self.date_time_provider.serialize(now),
+				"creation_date": now,
+				"update_date": now,
 			}
 
 			database_client.insert_one(self.table, job)
@@ -67,7 +67,7 @@ class JobProvider:
 				"steps": steps,
 				"parameters": parameters,
 				"properties": properties,
-				"update_date": self.date_time_provider.serialize(now),
+				"update_date": now,
 			}
 
 			job.update(update_data)
@@ -81,7 +81,7 @@ class JobProvider:
 
 		update_data = {
 			"is_enabled": is_enabled,
-			"update_date": self.date_time_provider.serialize(now),
+			"update_date": now,
 		}
 
 		update_data = { key: value for key, value in update_data.items() if value is not None }

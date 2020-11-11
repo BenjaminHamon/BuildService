@@ -1,8 +1,8 @@
-import json
 import logging
 import os
-
 from typing import List, Tuple
+
+from bhamon_orchestra_model.serialization.json_serializer import JsonSerializer
 
 
 logger = logging.getLogger("JsonDatabaseAdministration")
@@ -12,7 +12,8 @@ class JsonDatabaseAdministration:
 	""" Administration client for a database storing data as json files, intended for development only. """
 
 
-	def __init__(self, data_directory: str) -> None:
+	def __init__(self, serializer: JsonSerializer, data_directory: str) -> None:
+		self.serializer = serializer
 		self._data_directory = data_directory
 
 
@@ -79,16 +80,21 @@ class JsonDatabaseAdministration:
 
 	def _load(self) -> dict:
 		file_path = os.path.join(self._data_directory, "admin.json")
-		if not os.path.exists(file_path):
-			return { "indexes": [] }
-		with open(file_path, mode = "r", encoding = "utf-8") as data_file:
-			return json.load(data_file)
+
+		administration_data = None
+
+		try:
+			administration_data = self.serializer.deserialize_from_file(file_path)
+		except FileNotFoundError:
+			pass
+
+		if administration_data is None:
+			administration_data = { "indexes": [] }
+		return administration_data
 
 
 	def _save(self, administration_data: dict) -> None:
 		file_path = os.path.join(self._data_directory, "admin.json")
 		if not os.path.exists(os.path.dirname(file_path)):
 			os.makedirs(os.path.dirname(file_path))
-		with open(file_path + ".tmp", mode = "w", encoding = "utf-8") as administration_data_file:
-			json.dump(administration_data, administration_data_file, indent = 4)
-		os.replace(file_path + ".tmp", file_path)
+		self.serializer.serialize_to_file(file_path, administration_data)

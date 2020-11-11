@@ -18,6 +18,10 @@ class JsonSerializer(ISerializer):
 		self.indent = indent
 
 
+	def get_file_extension(self) -> None:
+		return ".json"
+
+
 	def serialize_to_file(self, path: str, value: Optional[Any]) -> None:
 		with open(path + ".tmp", mode = "w", encoding = "utf-8") as data_file:
 			json.dump(value, data_file, cls = JsonEncoder, indent = self.indent)

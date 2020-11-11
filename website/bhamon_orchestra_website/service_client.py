@@ -39,10 +39,16 @@ def post(route, data = None):
 
 def send_request(method, route, headers = None, parameters = None, data = None):
 	authentication = _get_authentication()
-	if parameters is None:
-		parameters = {}
 
-	response = requests.request(method, flask.current_app.service_url + route, auth = authentication, headers = headers, params = parameters, json = data)
+	if headers is None:
+		headers = {}
+
+	if data is not None:
+		headers["Content-Type"] = "application/json"
+		# data = "FIXME" # FIXME
+
+
+	response = requests.request(method, flask.current_app.service_url + route, auth = authentication, headers = headers, params = parameters, data = data)
 	response.raise_for_status()
 	return response
 

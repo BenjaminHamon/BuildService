@@ -23,7 +23,7 @@ def login():
 		try:
 			flask.session["token"] = service_client.post("/me/login", data = parameters)
 			flask.session["user"] = service_client.get("/me")
-			flask.session["last_refresh"] = flask.current_app.date_time_provider.serialize(now)
+			flask.session["last_refresh"] = now
 			flask.session.permanent = True
 			flask.flash("Login succeeded.", "success")
 			return flask.redirect(flask.url_for("website.home"))
@@ -64,7 +64,7 @@ def refresh_session():
 	try:
 		service_client.post("/me/refresh_session", { "token_identifier": flask.session["token"]["token_identifier"] })
 		flask.session["user"] = service_client.get("/me")
-		flask.session["last_refresh"] = flask.current_app.date_time_provider.serialize(now)
+		flask.session["last_refresh"] = now
 	except requests.HTTPError as exception:
 		if exception.response.status_code == 403:
 			flask.session.clear()
@@ -77,7 +77,7 @@ def show_profile():
 	user_tokens = service_client.get("/me/token_collection", { "order_by": [ "update_date descending" ] })
 	user_tokens.sort(key = lambda token: token["expiration_date"] is not None)
 
-	now = flask.current_app.date_time_provider.serialize(flask.current_app.date_time_provider.now())
+	now = flask.current_app.date_time_provider.now()
 	for token in user_tokens:
 		token["is_active"] = token["expiration_date"] > now if token["expiration_date"] is not None else True
 
